@@ -1,0 +1,118 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+/* Active Navigation Link */
+.active {
+  @apply text-second;
+}
+
+.active svg {
+  @apply text-second;
+}
+
+.bar:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.bar:nth-child(3) {
+  animation-delay: 0.4s;
+}
+.bar:nth-child(4) {
+  animation-delay: 0.6s;
+}
+.bar:nth-child(5) {
+  animation-delay: 0.8s;
+}
+.bar:nth-child(6) {
+  animation-delay: 1s;
+}
+
+.smooth-transition {
+  transition: all 0.3s ease-in-out;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.hide-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+input[type = 'range'] {
+  accent-color: #1DB954 ;
+}
+
+/* Styling loading */
+:root {
+	--size: 60px;
+}
+
+.spinner {
+	--animation-duration: 1000ms;
+}
+.spinner-item {
+	width: calc(var(--size) / 12);
+	height: 30%;
+	animation: spinner1 var(--animation-duration) ease-in-out infinite;
+}
+
+.spinner-item:nth-child(1) {
+	animation-delay: calc(var(--animation-duration) / 10 * -3);
+}
+
+.spinner-item:nth-child(2) {
+	animation-delay: calc(var(--animation-duration) / 10 * -1);
+}
+
+.spinner-item:nth-child(3) {
+	animation-delay: calc(var(--animation-duration) / 10 * -2);
+}
+  
+.spinner-item:nth-child(4) {
+	animation-delay: calc(var(--animation-duration) / 10 * -1);
+}
+
+.spinner-item:nth-child(5) {
+	animation-delay: calc(var(--animation-duration) / 10 * -3);
+}
+.cart-wrapper{
+  width: 100vw;
+  background: #00000080;
+  position: fixed;
+  right: 0;
+  top: 0;
+  z-index: 100;
+  /* will-change: transform; */
+  transition: all 1s ease-in-out;
+
+}
+
+.track {
+  position: absolute;
+  white-space: nowrap;
+  will-change: transform;
+  transform: translateX(-100%);
+  animation: marquee 13s linear infinite;
+}
+
+.track:hover {
+  animation-play-state: paused;
+}
+
+.category-box:hover p{
+  transform: translateY(0);
+}
+
+@keyframes marquee {
+  from { transform: translateX(100%); }
+  to { transform: translateX(-100%); }
+}
+
+@keyframes spinner1 {
+    50% {
+      transform: scaleY(0.25);
+    }
+}
