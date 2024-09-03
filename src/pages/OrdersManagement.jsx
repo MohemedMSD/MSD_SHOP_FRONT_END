@@ -1,25 +1,45 @@
 import React, { useEffect, useState } from 'react'
-import { FaEdit, FaEye } from 'react-icons/fa';
 import Axios from '../assets/constants/axios/axios';
 import { Loading, OrderM } from '../components';
-import { IoMdCloseCircleOutline } from 'react-icons/io'
+import { FaEdit, FaEye, FaSearch } from 'react-icons/fa';
+import {TbZoomReset} from 'react-icons/tb'
 import { useStateContext } from '../context/StateContext';
 import { useFunctionsContext } from '../context/FunctionsContext';
+import toast from 'react-hot-toast';
 
 const OrdersManagement = () => {
 
-  const {goToPreviousPage, goToNextPage, goToPage, PrepareArrayItems, setCurrentPage, currentPage, totalPages, setitemsPerPage} = useFunctionsContext()
-  const {Orders, setOrders, FilteredOrders, setFilteredOrders} = useStateContext()
+  const {
+    goToPreviousPage,
+    goToNextPage, 
+    goToPage, 
+    totalPages, 
+    settotalPages, 
+    renderPages
+  } = useFunctionsContext()
 
-  const [RunOneTime, setRunOneTime] = useState(true);
+  const {Orders, setOrders} = useStateContext()
+  const [currentPage, setCurrentPage] = useState(1)
 
   const [IsLoading, setIsLoading] = useState(true);
   const [errorMessage, seterrorMessage] = useState("");
   
-  const [currentOrders, setcurrentOrders] = useState([]);
+  const [Status, setStatus] = useState([]);
+
+  const [StockSearchQuery, setStockSearchQuery] = useState('');
+  const [StockStartDate, setStockStartDate] = useState('');
+  const [StockEndDate, setStockEndDate] = useState('');
+  const [StockSelectedStatus, setStockSelectedStatus] = useState('null')
 
   const [SearchQuery, setSearchQuery] = useState('');
-  const [SearchDate, setSearchDate] = useState('');
+  const [StartDate, setStartDate] = useState('');
+  const [EndDate, setEndDate] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState('');
+
+  const [ErrMsgDate, setErrMsgDate] = useState('');
+
+  const [SearchAction, setSearchAction] = useState(false)
+  const [Reload, setReload] = useState(false)
 
   const [OrderInfo, setOrderInfo] = useState({})
 
@@ -30,132 +50,85 @@ const OrdersManagement = () => {
 
     (async()=>{
 
-      // run just in reload page
-      if (RunOneTime) {
+      try {
+        
+        const res = await Axios.get("/status")
 
-        setIsLoading(true);
+        if (res.status === 200) {
 
-        try {
+            setStatus(res.data.data);
           
-          const res = await Axios.get("/archive-orders")
-
-          if (res.status === 200) {
-            if (res.data.data.length > 0) {
-              setOrders(res.data.data);
-              setFilteredOrders(res.data.data);
-              setCurrentPage(1)
-              setitemsPerPage(5)
-            } else {
-              seterrorMessage("No Orders Exists");
-            }
-          }
-
-        } catch (error) {
-          seterrorMessage("Something Wrong! Try Again");
         }
 
-        setIsLoading(false)
-        setRunOneTime(false);
-
+      } catch (error) {
+        toast.error("Something Wrong in get status data! Try Again");
       }
 
     })()
 
-    PrepareArrayItems(FilteredOrders, setcurrentOrders);
+  }, [])
 
-  }, [currentPage, Orders, RunOneTime, FilteredOrders]);
+  useEffect(() => {
 
-  const dataFilter = (e) => {
-
-      setSearchQuery(e.target.value)
+    (async()=>{
       
-      let filteredData = [];
-      
-      if(SearchDate === '' || e.target?.dateValue === ''){
+      setIsLoading(true);
+
+      try {
         
-        filteredData = Orders.filter(item =>
-          (item.id).toString().toLowerCase().includes(e.target.value.toLowerCase()) ||
-          item.status.toLowerCase().includes(e.target.value.toLowerCase()) ||
-          parseInt(item.price) === parseInt(e.target.value)||
-          parseInt(item.quantity) === parseInt(e.target.value)
-        );
+        let res;
 
-      }else{
-        
-        filteredData = FilteredOrders.filter(item =>
-          (item.id).toString().toLowerCase().includes(e.target.value.toLowerCase()) ||
-          item.status.toLowerCase().includes(e.target.value.toLowerCase()) ||
-          parseInt(item.price) === parseInt(e.target.value)||
-          parseInt(item.quantity) === parseInt(e.target.value)
-        );
+        if (SearchAction) {
 
-      }
-      
-      // when the search input empty return all product 
-      if (e.target.value ==='') {
+          res = await Axios.get(`/archive-orders/search/${SearchQuery || 'null'}/${StartDate || 'null'}/${EndDate || 'null'}/${selectedStatus || 'null'}/${currentPage}`)
 
-        if (SearchDate === '') {
-          setFilteredOrders(Orders)
         }else{
-          dataFilterByDate({target : {value : SearchDate, queryValue : ''}})
+
+          res = await Axios.get("/archive-orders/" + currentPage)
+          
         }
 
-      }else{
+        if (res.status === 200) {
 
-        setFilteredOrders(filteredData)
-        goToPage(1)
+          if (res.data.orders.length > 0) {
 
+            setOrders(res.data.orders);
+            settotalPages(res.data.total_pages)
+            seterrorMessage('')
+
+          } else {
+
+            setOrders([]);
+            settotalPages(0)
+            seterrorMessage("No Orders Exists");
+
+          }
+
+        }
+
+      } catch (error) {
+        setOrders([]);
+        settotalPages(0)
+        seterrorMessage("Something Wrong! Try Again");
       }
 
-  }
+      setIsLoading(false)
+    })()
 
-  const dataFilterByDate = (e) => {
-
-    setSearchDate(e.target.value)
-
-    let filteredData = [];
-
-    if (SearchQuery === '' || e.target?.queryValue === '') {
-      
-      filteredData = Orders.filter(item =>
-        item.date === e.target.value
-      );
-
-    }else{
-
-      filteredData = FilteredOrders.filter(item =>
-        item.date === e.target.value
-      );
-
-    }
-    
-    // when the search input empty return all product 
-    if (e.target.value ==='') {
-        
-      if (SearchQuery === '') {
-        setFilteredOrders(Orders)
-      }else{
-        dataFilterByDate({target : {value : SearchQuery}})
-      }
-
-    }else{
-
-      setFilteredOrders(filteredData)
-      goToPage(1)
-
-    }
-
-  }
+  }, [currentPage, Reload])
 
   const prepareToUpdateOrShow = async (OrderID, action) => {
 
     try {
       
-      const res = await Axios.get('/archive-orders/' + OrderID)
+      const res = await Axios.get('/archive-orders/show/' + OrderID)
 
       if (res.status === 200) {
             
-        setOrderInfo(res.data);
+        setOrderInfo({
+          ...res.data,
+          id : OrderID
+        });
         
         if (action === 'update') {
           setShowModalUpdate(true)
@@ -171,62 +144,153 @@ const OrdersManagement = () => {
 
   }
 
-  const resetDateInput = () => {
+  const runUseEffectForSearch = (e) => {
 
-    setSearchDate('')
-
-    if (SearchQuery === '') {
-
-      setFilteredOrders(Orders)
-
-    }else{
+    const regex = /^[\w\s\-\_\=\+]+$/
+    if (regex.test(e.target.value) || e.target.value == '') {
       
-      dataFilter({target : {value : SearchQuery, dateValue : ''}})
+      setStockSearchQuery(e.target.value)
 
     }
 
   }
 
+  const search = () => {
+
+    if (
+      StockStartDate != '' && StockEndDate == '' ||
+      StockStartDate == '' && StockEndDate != ''
+    ) {
+      
+      setErrMsgDate('The two date fields are required')
+
+    }else {
+
+      if (
+        StockSearchQuery != '' || 
+        StockStartDate != '' && StockEndDate != '' || 
+        StockSelectedStatus != 'null'
+      ) {
+        
+        setSearchQuery(StockSearchQuery)
+        setStartDate(StockStartDate)
+        setEndDate(StockEndDate)
+        setSelectedStatus(StockSelectedStatus)
+        setSearchAction(true)
+  
+      }else{
+        setSearchAction(false)
+      }
+  
+      setErrMsgDate('')
+      setCurrentPage(1)
+      setReload(!Reload)
+
+    }
+
+  }
+
+  const resetSearch = () => {
+
+    setSearchAction(false)
+    setStartDate('')
+    setEndDate('')
+    setSearchQuery('')
+    setSelectedStatus('null')
+    setStockStartDate('')
+    setStockEndDate('')
+    setStockSearchQuery('')
+    setStockSelectedStatus('null')
+    setCurrentPage(1)
+    setReload(!Reload)
+
+  }
+
   return (
     <div>
-      <h1 className="text-[#324d67] mb-5 font-bold text-[19px] sm:text-[25px] ">
+      <h1 className="text-primary_text mb-5 font-bold text-[19px] sm:text-[25px] ">
         Orders Management
       </h1>
 
       <div className="border rounded-xl border-gray-200 shadow-lg">
         <div className="flex rounded-t-lg items-center justify-between p-3 bg-gray-200">
-          <h2 className="text-[#324D67] font-semibold text-[22px]">
+          <h2 className="text-primary_text font-semibold text-[22px]">
             Orders
           </h2>
         </div>
 
-        <div className="py-4 border-b border-gray-300 px-3 flex items-center gap-4 justify-between flex-wrap">
+        <div className="py-4 border-b border-gray-300 px-3 flex items-center gap-4 flex-wrap">
           
           <div className=''>
-            <label className='mr-2'>Filter By Date : </label>
+            <label className='mr-2 font-semibold'>Start Date</label>
             <input
               type="date"
-              value={SearchDate}
-              onChange={(e) => dataFilterByDate(e)}
-              className="p-1 mr-2 rounded-md border border-gray-300 focus:border-[#324D67] outline-none"
+              value={StockStartDate}
+              onChange={(e) => setStockStartDate(e.target.value)}
+              className="p-1 mr-2 rounded-md border border-gray-300 focus:border-primary_text outline-none"
             />
-            <button onClick={() => resetDateInput()}><IoMdCloseCircleOutline/></button>
+          </div>
+
+          <div className=''>
+            <label className='mr-2 font-semibold'>End Date</label>
+            <input
+              type="date"
+              value={StockEndDate}
+              onChange={(e) => setStockEndDate(e.target.value)}
+              className="p-1 mr-2 rounded-md border border-gray-300 focus:border-primary_text outline-none"
+            />
           </div>
 
           <div>
-            <label>Search : </label>
+            <label className='mr-2 font-semibold'>Search</label>
             <input
               type="text"
-              value={SearchQuery}
-              onChange={(e) => dataFilter(e)}
-              className="p-1 rounded-md border border-gray-300 focus:border-[#324D67] outline-none"
+              value={StockSearchQuery}
+              onChange={(e) => runUseEffectForSearch(e)}
+              className="p-1 rounded-md border border-gray-300 focus:border-primary_text outline-none"
             />
+          </div>
+
+          <div className=''>
+            <label className='font-semibold mr-2'>Status</label>
+            <select
+              defaultValue={StockSelectedStatus}
+              className="p-1 mr-2 rounded-md focus:shadow-md focus:rounded-md border border-gray-300 focus:border-primary_text outline-none"
+              onChange={(e) => setStockSelectedStatus(e?.target.value)}
+            >
+              <option 
+                value='null'
+                disabled
+              >select a status</option>
+              {
+                Status?.map((item, index) => (
+                  <option key={index} value={item.statut}>{item.statut}</option>
+                ))
+              }
+            </select>
+          </div>
+
+          <div>
+          
+            <div className='flex items-center gap-2'>
+
+              <button onClick={(e) => search(e)} className='text-white bg-second border border-second hover:opacity-90 font-semibold py-2 px-2 rounded-lg'><FaSearch/></button>
+              <button onClick={(e) => resetSearch(e)} className='text-second  hover:bg-second hover:text-white font-semibold border border-second py-2 px-2 rounded-lg'><TbZoomReset /></button>
+              
+            </div>
+
+            {
+              ErrMsgDate && <p className='text-red-500 mt-3 font-semibold'>{ErrMsgDate}</p>
+            }
+            
+
           </div>
 
         </div>
 
         <div className='overflow-x-scroll hide-scrollbar relative'>
           
+          {IsLoading && <Loading />}
           <table className="text-left w-full border-collapse">
             <thead>
               <tr>
@@ -255,21 +319,20 @@ const OrdersManagement = () => {
                 IsLoading || errorMessage ? "h-[34vh]" : ""
               }`}
             >
-              {IsLoading && <Loading />}
               {!IsLoading && errorMessage && (
-                <p className="absolute text-[21px] text-second font-bold -translate-y-[50%] text-center w-full left-0 top-[50%]">
-                  {errorMessage}
-                </p>
+                <tr className="absolute text-[21px] text-red-500 font-bold -translate-y-[50%] text-center w-full left-0 top-[50%]">
+                  <td className="text-center w-[1440px]">{errorMessage}</td>
+                </tr>
               )}
               {!IsLoading &&
-                currentOrders.length > 0 &&
-                currentOrders?.map((item) => (
+                Orders.length > 0 &&
+                Orders?.map((item) => (
                   <tr key={item.id} className="hover:bg-gray-200">
                     <td className="py-4 text-center px-2 border-b border-grey-light">
-                      {item.id}
+                      {item.ref}
                     </td>
                     <td className="py-4 text-center px-2 border-b border-grey-light">
-                      {item.total_price}
+                      {Math.round(item.total_price * 100) / 100}
                     </td>
                     <td className="py-4 text-center px-2 border-b border-grey-light">
                       {item.quantity}
@@ -284,7 +347,7 @@ const OrdersManagement = () => {
                         {item.status} {!item.received && item.part === 4 ? <span className=' text-red-500'>Not Confirmed</span> : ''} 
                       </td>
                     }
-                    <td className="py-4 text-center px-2 border-b border-grey-light">
+                    <td className="py-4 text-nowrap text-center px-2 border-b border-grey-light">
                       {item.created_at.slice(0, 10)}
                     </td>
                     <td className="py-4 border-b border-grey-light">
@@ -309,8 +372,9 @@ const OrdersManagement = () => {
           </table>
 
         </div>
-
-        <div className="border-b p-5 border-gray-300 px-3 flex items-center gap-4 justify-center">
+        {
+          (!IsLoading && totalPages > 0) && (
+            <div className="border-b p-5 border-gray-300 px-3 flex items-center gap-4 justify-center">
           <ol className="flex justify-center gap-1 text-[16px] font-medium">
             <li>
               <button
@@ -333,23 +397,7 @@ const OrdersManagement = () => {
               </button>
             </li>
 
-            {Array.from({ length: totalPages }, (_, index) => index + 1).map(
-              (item) => (
-                <li key={item}>
-                  <button
-                    onClick={() => goToPage(item)}
-                    href="#"
-                    className={`block ${
-                      currentPage === item
-                        ? "border-second bg-second text-white"
-                        : "border-gray-100 bg-white text-gray-900"
-                    } size-8 rounded border text-center leading-8 `}
-                  >
-                    {item}
-                  </button>
-                </li>
-              )
-            )}
+            {renderPages(currentPage, totalPages)}
             <li>
               <button
                 onClick={() => goToNextPage()}
@@ -371,7 +419,9 @@ const OrdersManagement = () => {
               </button>
             </li>
           </ol>
-        </div>
+            </div>
+          )
+        }
       </div>
 
       {ShowModalUpdate && (
@@ -380,7 +430,7 @@ const OrdersManagement = () => {
           header="Update Order"
           action="update"
           order={OrderInfo}
-          setFilteredOrders={setFilteredOrders}
+          setOrders={setOrders}
         />
       )}
       {ShowModalShow && (

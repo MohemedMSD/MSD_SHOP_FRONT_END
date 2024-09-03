@@ -41,6 +41,7 @@ const StateContext = ({ children }) => {
 			localStorage.setItem('user', JSON.stringify(user));
 			localStorage.setItem('token', user.token);
       const now = new Date;
+
       const expirationTime = now.getTime() + (1 * 24 * 60 * 60 * 1000)
 			localStorage.setItem('expirationTime', expirationTime);
 
@@ -84,18 +85,33 @@ const StateContext = ({ children }) => {
 
     const ProductRemoved = cardItems?.find((item) => item.id === id);
 
-    setcardItems(newCartItem);
-    settotalQuantity(
-      (pretotalQuantity) => pretotalQuantity - ProductRemoved?.quantity
-    );
-
-    settotalPrice(
-      (pretotalPrice) =>
-        pretotalPrice -
-        parseInt(ProductRemoved?.product.price * ProductRemoved?.quantity)
-    );
-
     Axios.delete('/card/' + id)
+    .then(res => {
+
+      if (res.status == 200) {
+
+        setcardItems(newCartItem);
+        settotalQuantity(
+          (pretotalQuantity) => pretotalQuantity - ProductRemoved?.quantity
+        );
+
+        const productPrice = parseFloat(
+            ProductRemoved?.product?.discount?.discount ? 
+              ProductRemoved?.product?.price - (ProductRemoved?.product.price * ProductRemoved?.product?.discount?.discount / 100)
+                :
+                ProductRemoved?.product.price
+            );
+
+
+        settotalPrice(
+          (pretotalPrice) =>
+            pretotalPrice -
+            parseFloat(productPrice * ProductRemoved?.quantity)
+        );
+        
+      }
+
+    })
     .catch(rej => console.log(rej)) 
 
   };
@@ -113,14 +129,21 @@ const StateContext = ({ children }) => {
             item.quantity = item.quantity + 1;
             
             settotalPrice(
-              (pretotalPrice) => pretotalPrice + parseInt(item.product.price)
+              (pretotalPrice) =>
+                pretotalPrice + parseInt(
+                  item?.product?.discount?.discount ? 
+                    item?.product?.price - (item?.product?.price * item?.product?.discount?.discount / 100)
+                    :
+                    item?.product?.price
+                )
             );
   
             settotalQuantity((pretotalQuantity) => pretotalQuantity + 1);
 
             
-            Axios.put('/card/' + item.id, {
-              quantity : item.quantity
+            Axios.post('/update-card/' + item.id, {
+              quantity : item.quantity,
+              _method : 'put'
             }, {
               headers : {
                 'Content-Type' : 'text/json'
@@ -142,8 +165,16 @@ const StateContext = ({ children }) => {
 
             settotalPrice((pretotalPrice) => {
 
-              if (pretotalPrice - parseInt(item.product.price) < 0) return pretotalPrice;
-              return pretotalPrice - parseInt(item.product.price);
+              const productPrice =  parseFloat(
+                    item?.product?.discount?.discount ? 
+                      item?.product?.price - (item?.product?.price * item?.product?.discount?.discount / 100)
+                      :
+                      item?.product?.price
+                      // ro.alyn_sampmobile.game
+                  );
+
+              if (pretotalPrice - productPrice < 0) return pretotalPrice;
+              return pretotalPrice - productPrice;
 
             });
 
@@ -156,8 +187,9 @@ const StateContext = ({ children }) => {
 
           }
 
-          Axios.put('/card/' + item.id, {
-            quantity : item.quantity
+          Axios.post('/update-card/' + item.id, {
+            quantity : item.quantity,
+            _method : 'put'
           }, {
             headers : {
               'Content-Type' : 'text/json'
@@ -191,8 +223,9 @@ const StateContext = ({ children }) => {
 
             setisAddingOnCart(true)
 
-            Axios.put('/card/' + checkProductIfExists.id, {
-              quantity : checkProductIfExists.quantity + quantity
+            Axios.post('/update-card/' + checkProductIfExists.id, {
+              quantity : checkProductIfExists.quantity + quantity,
+              _method : 'put'
             }, {
               headers : {
                 'Content-Type' : 'text/json'
@@ -206,9 +239,14 @@ const StateContext = ({ children }) => {
 
               settotalPrice(
                 (pretotalPrice) =>
-                  pretotalPrice + parseInt(product.price) * parseInt(quantity)
+                  pretotalPrice + parseFloat(
+                    product?.discount ? 
+                      product?.price - (product?.price * product?.discount / 100)
+                      :
+                      product?.price
+                  ) * parseInt(quantity)
               );
-          
+
               settotalQuantity((pretotalQuantity) => pretotalQuantity + quantity);
 
             })
@@ -251,7 +289,12 @@ const StateContext = ({ children }) => {
 
           settotalPrice(
             (pretotalPrice) =>
-              pretotalPrice + parseInt(product.price) * parseInt(quantity)
+              pretotalPrice + parseFloat(
+                product?.discount ? 
+                  product?.price - (product?.price * product?.discount / 100)
+                  :
+                  product?.price
+              ) * parseInt(quantity)
           );
       
           settotalQuantity((pretotalQuantity) => pretotalQuantity + quantity);
@@ -270,18 +313,53 @@ const StateContext = ({ children }) => {
     // toast.success(`${product.name} added in your cart`);
   };
 
-  const getCardItems = () => {
-    Axios.get('/card')
-    .then((res)=>{
-      
-      if (res.status === 200) {
-        
-        setcardItems(res.data.card)
+  const getCardItems = async() => {
 
+    try {
+
+      if(user){
+
+        const res = await Axios.get('/card');
+
+        if (res.status == 200) {
+
+          setcardItems(res.data?.card)
+          
+          if (totalPrice === 0) {
+
+            if (res.data?.card?.length > 0) {
+
+              let totalPrice = 0;
+              let totalQuantity = 0;
+              res.data?.card?.forEach((item) => {
+
+                totalPrice += parseFloat(
+                  item?.product?.discount?.discount ? 
+                    item?.product?.price - (item?.product?.price * item?.product?.discount?.discount / 100)
+                    :
+                    item?.product?.price
+                )* parseInt(item.quantity);
+
+                totalQuantity += item.quantity;
+
+                settotalPrice(totalPrice);
+            
+                settotalQuantity(totalQuantity);
+            
+              })
+
+            }
+
+          }
+
+        }
+  
       }
 
-    })
-    .catch((rej) => console.log(rej))
+    } catch (error) {
+      console.log(error);
+    }
+    
   } 
   
   const makeOrder = (card_Items) => {

@@ -13,7 +13,13 @@ import {
 	LandingPage,
 	Login,
 	Register,
-	HomeDashboard
+	HomeDashboard,
+	SendVerifyCode,
+	EmailVerification,
+	ForgetPassword,
+	ResetPassword,
+	DiscountsManagements,
+	ReviewsPage
 } from "./pages";
 
 import { SuccessCom, CancelCom, ProductDetails } from "./components";
@@ -30,6 +36,22 @@ const router = createBrowserRouter([
 			{
 				path: '/auth/register',
 				element: <Register />,
+			},
+			{
+				path: '/auth/send-verification-code',
+				element: <SendVerifyCode />,
+			},
+			{
+				path: '/auth/email-verification/:token',
+				element: <EmailVerification />,
+			},
+			{
+				path: '/auth/forget-password',
+				element: <ForgetPassword />,
+			},
+			{
+				path: '/auth/reset-password/:token',
+				element: <ResetPassword />,
 			},
 		],
 	},
@@ -54,9 +76,13 @@ const router = createBrowserRouter([
 				element: <ProductDetails />,
 			},
 			{
-				path: '/products/search/:query',
+				path: '/products-search/:query',
 				element: <Search />,
 			},
+			{
+				path: '/products/review/:id',
+				element: <ReviewsPage />,
+			}
 		],
 	},
     {
@@ -78,6 +104,10 @@ const router = createBrowserRouter([
 			{
 				path : '/dashboard/orders',
 				element : <OrdersManagement />
+			},
+			{
+				path : '/dashboard/discounts',
+				element : <DiscountsManagements />
 			},
 			{
 				path : '/dashboard/trashed-products',

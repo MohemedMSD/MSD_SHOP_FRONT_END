@@ -30,7 +30,15 @@ const SuccessCom = () => {
             }
 
         })
-        .catch((rej) => console.log(rej))
+        .catch((rej) => {
+            
+            if (rej.response?.status == 422) {
+                
+                window.location.href = '/'
+
+            }
+
+        })
 
     }, [])
 

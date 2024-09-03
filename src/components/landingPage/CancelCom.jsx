@@ -29,7 +29,7 @@ const CancelCom = () => {
     }, [])
 
   return (
-    <div className='relative bg-white'>
+    <div className='relative bg-white h-[92vh]'>
         <Loading/>
     </div>
   )

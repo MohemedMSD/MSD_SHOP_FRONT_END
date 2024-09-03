@@ -3,7 +3,19 @@ import toast from 'react-hot-toast';
 import { IoMdCloseCircleOutline } from 'react-icons/io';
 import Axios from '../../../assets/constants/axios/axios';
 
-const CategoryM = ({category, Categories, header, action, closeModal, setCategories, setFilteredCategories, seterrorMessage}) => {
+const CategoryM = ({
+  category, 
+  Categories, 
+  setReload, 
+  setCurrentPage, 
+  header, 
+  action, 
+  closeModal, 
+  setCategories, 
+  seterrorMessage,
+  setSearchAction,
+  setSearchQuery
+}) => {
 
     const [Name, setName] = useState('');
     const [ErrName, setErrName] = useState('');
@@ -47,6 +59,8 @@ const CategoryM = ({category, Categories, header, action, closeModal, setCategor
     const createCategory = async (e) => {
         e.preventDefault()
 
+        toast.loading('Processing...')
+
         let formData = new FormData()
         formData.append('name', Name)
         formData.append('image', Image)
@@ -56,19 +70,24 @@ const CategoryM = ({category, Categories, header, action, closeModal, setCategor
           const res = await Axios.post('/categories', formData)
           if (res.status === 200) {
         
-
-            setCategories([...Categories, res.data])
-
-
-            setFilteredCategories([...Categories, res.data])
+            setSearchAction(true)
+            setSearchQuery(Name)
             seterrorMessage('')
+
+            seterrorMessage('')
+            toast.dismiss()
             toast.success('Category Created Successfully')
+            setReload(pre => !pre)
+            setCurrentPage(1)
             closeModal(false)
+
 
           }
 
         } catch (rej) {
           
+          toast.dismiss()
+
           if (rej.response.status === 422) {
             
             const messages = rej.response.data;
@@ -85,7 +104,15 @@ const CategoryM = ({category, Categories, header, action, closeModal, setCategor
               setErrImage('')
             }
 
+            toast.error('The information is incorrect or or invalid')
+
+          }else{
+
+            toast.error('Something wrong, please try again')
+
           }
+
+
 
         }
 
@@ -94,8 +121,11 @@ const CategoryM = ({category, Categories, header, action, closeModal, setCategor
     const updateCategory = async (e, id) => {
       e.preventDefault()
 
+      toast.loading('Processing...')
+
       let formData = new FormData()
       formData.append('name', Name)
+      formData.append('_method', 'PUT')
 
       if (typeof(Image) !== 'string') {
         formData.append('image', Image)
@@ -119,13 +149,15 @@ const CategoryM = ({category, Categories, header, action, closeModal, setCategor
         })
 
         setCategories(UpdatedCategories)
-        setFilteredCategories(UpdatedCategories)
+        
         seterrorMessage('')
+        toast.dismiss()
         toast.success('Category Updated Successfully')
         closeModal(false)
 
       } catch (rej) {
         
+        toast.dismiss()
         if (rej.response.status === 422) {
           
           const messages = rej.response.data;
@@ -142,6 +174,10 @@ const CategoryM = ({category, Categories, header, action, closeModal, setCategor
             setErrImage('')
           }
 
+          toast.error('The information is incorrect or or invalid')
+
+        } else{
+          toast.error('Something wrong, please try again')
         }
 
       }
@@ -165,25 +201,32 @@ const CategoryM = ({category, Categories, header, action, closeModal, setCategor
         <div className="flex flex-col gap-3 p-2 sm:p-5">
 
           <div className="border border-gray-400 p-2 rounded-lg">
-            <h1 className="text-[26px] text-[#324d67] font-bold">
+            <h1 className="text-[26px] text-primary_text font-bold">
               Category Information :
             </h1>
             <form action="" className="relative flex flex-col gap-4 mt-3 p-2">
 
               <div className="flex flex-col">
                 <div className={`w-[150px] ${!Image ? 'flex items-center justify-center' : ''} h-[150px] bg-gray-300 mx-auto mb-2 rounded-lg`}>
-                    {Image ? <img className="h-full rounded-lg w-full" src={ typeof(Image) === 'string' ? localStorage.getItem('baseUrl') + '/uploads/' + Image : URL.createObjectURL(Image)} alt="profile" /> : <div className="bg-gray-400 w-full h-full flex items-center justify-center text-[23px] text-white rounded-lg">No Image</div>}
+                    {Image ? 
+                      <img 
+                        className="h-full rounded-lg w-full" 
+                        src={ typeof(Image) === 'string' ? Image : URL.createObjectURL(Image)} 
+                        alt="profile" 
+                      /> 
+                      : <div className="bg-gray-400 w-full h-full flex items-center justify-center text-[23px] text-white rounded-lg">No Image</div>}
                 </div>
                 <div className="flex gap-3 items-center">
                     <label className=" w-1/4">Image</label>
                     <input
                     fileName={Image}
+                    disabled={action == 'show'}
                     onChange={(e) => hundleChange(e)}
                     type="file"
-                    className={`border w-3/4 ${ErrImage === '' ? 'border-gray-400' : 'border-second'} rounded-lg py-2 px-3 focus:border-[#324d67] outline-none`}
+                    className={`border w-3/4 ${ErrImage === '' ? 'border-gray-400' : 'border-red-500'} rounded-lg py-2 px-3 focus:border-primary_text outline-none`}
                     />
                 </div>
-                {ErrImage !== '' && <p className="text-second font-semibold mt-2">{ErrImage}</p>}
+                {ErrImage !== '' && <p className="text-red-500 font-semibold mt-2">{ErrImage}</p>}
               </div>
 
               <div className="flex flex-col">
@@ -194,22 +237,22 @@ const CategoryM = ({category, Categories, header, action, closeModal, setCategor
                     disabled={action === 'show'}
                     value={Name}
                     onChange={(e) => setName(e.target.value)}
-                    className={` ${ErrName ? 'border-second' : 'border-gray-400'} border w-3/4  rounded-lg py-2 px-3 focus:border-[#324d67] outline-none`}
+                    className={` ${ErrName ? 'border-red-500' : 'border-gray-400'} border w-3/4  rounded-lg py-2 px-3 focus:border-primary_text outline-none`}
                     />
                 </div>
-                { ErrName && <p className="text-second font-semibold ml-[25%] px-4 py-1">{ErrName}</p>}
+                { ErrName && <p className="text-red-500 font-semibold ml-[25%] px-4 py-1">{ErrName}</p>}
               </div>
               
               {
-                action === 'create' && <button onClick={(e) => createCategory(e)} className="p-2 mx-auto w-[20%] font-semibold bg-second text-white rounded-md">Save</button>
+                action === 'create' && <button onClick={(e) => createCategory(e)} className="p-2 mx-auto w-full sm:w-fit font-semibold bg-second text-white rounded-md">Save</button>
               }
 
               {
-                action === 'update' && <button onClick={(e) => updateCategory(e, category.id)} className="p-2 mx-auto w-[20%] font-semibold bg-second text-white rounded-md">Save</button>
+                action === 'update' && <button onClick={(e) => updateCategory(e, category.id)} className="p-2 mx-auto w-full sm:w-fit font-semibold bg-second text-white rounded-md">Save</button>
               }
               {
                 action === 'show' && 
-                <button onClick={(e) => closeModal(false)} className="p-2 mx-auto w-[20%] font-semibold bg-gray-500 text-white rounded-md">Close</button>
+                <button onClick={(e) => closeModal(false)} className="p-2 mx-auto w-full sm:w-fit font-semibold bg-gray-500 text-white rounded-md">Close</button>
               }
 
             </form>

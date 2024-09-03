@@ -8,5 +8,6 @@ export const links = [
     { name: 'Products', to: '/dashboard/products', icon : <FaShop fontSize={27} className="mr-2"/> },
     { name: 'Categories', to: '/dashboard/categories', icon : <BiCategory fontSize={27} className="mr-2"/> },
     { name: 'Orders', to: '/dashboard/orders', icon : <BiPurchaseTag fontSize={27} className="mr-2"/> },
+    { name: 'Discounts', to: '/dashboard/discounts', icon : <BiPurchaseTag fontSize={27} className="mr-2"/> },
     { name: 'Trashed Products', to: '/dashboard/trashed-products', icon : <CgTrashEmpty fontSize={27} className="mr-2"/> },
   ];

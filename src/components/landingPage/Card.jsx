@@ -1,5 +1,5 @@
-import React from "react";
-import toast from "react-hot-toast";
+import React, { useEffect } from "react";
+import { useState } from "react";
 import {
   AiOutlineMinus,
   AiOutlinePlus,
@@ -8,8 +8,7 @@ import {
 } from "react-icons/ai";
 import { TiDeleteOutline } from "react-icons/ti";
 import { Link, NavLink } from "react-router-dom";
-import Swal from "sweetalert2";
-import Axios from "../../assets/constants/axios/axios";
+import { CostumerAdress } from "..";
 import { useStateContext } from "../../context/StateContext";
 
 const Card = () => {
@@ -20,88 +19,28 @@ const Card = () => {
     totalPrice,
     totalQuantity,
     settotalPrice,
+    getCardItems,
     settotalQuantity,
     setshowCart,
     toggleCartChangeQty,
-    setcardItems,
-    baseUrl,
     removeProductInCart,
   } = useStateContext();
+
+  const [showAdressModal, setShowAdressModal] = useState(false)
   
-  if (totalPrice === 0) {
+  useEffect(()=>{
 
-    if (cardItems.length > 0) {
+    getCardItems()
 
-      let totalPrice = 0;
-      let totalQuantity = 0;
-      cardItems.forEach((item) => {
-
-        totalPrice += parseInt(item.product.price) * parseInt(item.quantity)
-        totalQuantity += item.quantity;
-
-        settotalPrice(totalPrice);
-    
-        settotalQuantity(totalQuantity);
-    
-      })
-
+    if(showCart){
+        document.body.style.overflowY = 'hidden'
+    }else{
+        document.body.style.overflowY = 'scroll'
     }
 
-  }
+  }, [])
 
-  const checkout = () => {
 
-    toast.loading('redirect...')
-    
-    let arrayProducts = cardItems.map((item) => {
-      return {
-        price_data : {
-            currency : 'usd',
-            product_data : {
-                name : item.product.name,
-            },
-            unit_amount : item.product.price * 100,
-        },
-        adjustable_quantity : {
-            enabled : false,
-        },
-        quantity : item.quantity
-      }
-    })
-
-    const products = cardItems.map((item) => {
-      return {
-        id : item.product.id,
-        quantity : item.quantity
-      }
-    })
-    
-    Axios.post('/checkout', {
-      products_checkout : arrayProducts,
-      success : window.location.origin + '/success',
-      cancel :  window.location.origin + '/cancel',
-      products : products
-    })
-    .then((res) => {
-      if (res.status) {
-        window.location.href = res.data
-      }
-    })
-    .catch((rej) => {
-      
-      if (rej.response.status === 422) {
-        
-        Swal.fire({
-          title : 'Error!',
-          text : rej.response.data.products,
-          icon : 'error'
-        })
-        
-      }
-
-    })
-
-  }
 
   return (
     
@@ -139,19 +78,35 @@ const Card = () => {
               <div className={` ${ i !== 0 ? 'border-t border-gray-300 ' : ''} flex px-0 sm:px-5 py-5 justify-between flex-wrap gap-0 sm:gap-[15px] w-full`} key={item.id}>
                 
                 <img
-                  src={item.product.images && localStorage.getItem('baseUrl') + '/uploads/' + item.product.images}
+                  src={item.product.images}
                   alt={`Image_${i}`}
                   className="sm:w-[130px] sm:h-[130px] w-[110px] h-[110px] rounded-2xl bg-[#ebebeb]"
                 />
 
-                <div className="flex flex-col gap-4 sm:gap-0 justify-between w-[59%] sm:w-[64%] text-[#324d67]">
+                <div className="flex flex-col gap-4 sm:gap-0 justify-between w-[59%] sm:w-[64%] text-primary_text">
 
-                  <div className="flex justify-between items-center flex-wrap gap-[10px] w-full text-[#324d67]">
+                  <div className="flex justify-between items-center flex-wrap gap-[10px] w-full text-primary_text">
                     <NavLink to={`/products/${ + item.product.id}`} className="text-[18px] sm:text-[24px] font-bold">{item.product.name}</NavLink>
-                    <h4 className="text-[16px] sm:text-[20px] font-bold">${item.product.price}</h4>
+                    <h4 className="text-[16px] sm:text-[20px] font-bold">
+                      
+                      {
+                        item?.product?.discount?.discount ?
+
+                        <div className="flex text-gray-400 gap-2">
+                          <p><s>${item.product.price}</s></p> 
+                          <p className="text-second">${Math.round((item.product.price - (item.product.price * (item.product?.discount?.discount / 100))) * 100) / 100}</p>
+                        </div>
+
+                        :
+
+                          item.product.price
+                        
+                      }
+
+                    </h4>
                   </div>
 
-                  <div className="flex justify-between w-full text-[#324d67] mb-3">
+                  <div className="flex justify-between w-full text-primary_text mb-3">
 
                     <div className="">
 
@@ -191,16 +146,22 @@ const Card = () => {
           <div className=" absolute backdrop-blur-lg bottom-0 right-0 w-full px-[35px] py-[15px] sm:pb-[20px] sm:px-[65px]">
             <div className="flex justify-between font-semibold sm:font-[700]">
               <h3 className="text-[22px] sm:text-[25px]">Totale Price : </h3>
-              <h3 className="text-[22px] sm:text-[25px]">${totalPrice}</h3>
+              <h3 className="text-[22px] sm:text-[25px]">${Math.round(totalPrice * 100) / 100}</h3>
             </div>
             <div className=" w-[90%] sm:w-[300px] m-auto">
-              <button onClick={()=>checkout()} className="w-full text-white max-w-[400px] text-[20px] mt-5 cursor-pointer scale-100 transition-transform duration-500 ease-in uppercase bg-second px-3 py-[10px] rounded-2xl border-none hover:scale-110 " type="button">
-                Pay With Stripe
+              <button onClick={()=> setShowAdressModal(true)} className="w-full text-white max-w-[400px] text-[20px] mt-5 cursor-pointer scale-100 transition-transform duration-500 ease-in uppercase bg-second px-3 py-[10px] rounded-2xl border-none hover:scale-110 " type="button">
+                Purchase now
               </button>
             </div>
           </div>
         )}
 
+        {
+          showAdressModal && <CostumerAdress 
+            cardItems={cardItems}
+            closeModal={setShowAdressModal}
+          />
+        }
       </div>
   );
 };

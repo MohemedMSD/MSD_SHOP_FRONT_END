@@ -18,9 +18,34 @@ const Notification  = React.lazy(()=>import("./Notification"))
 const Profile  = React.lazy(()=>import("./Profile"))
 const SideBar  = React.lazy(()=>import("./SideBar"))
 const MyOrders = React.lazy(() => import('./landingPage/MyOrders'));
-
+const Timer = React.lazy(() => import('./Timer'));
+const Services = React.lazy(() => import('./Services'));
+const Categories_Com = React.lazy(() => import('./landingPage/Categories'));
+const FooterBanner = React.lazy(()=> import('./landingPage/FooterBanner'))
+const Partners = React.lazy(()=> import('./landingPage/Partners'))
+const Review = React.lazy(()=> import('./landingPage/Review'))
+const DiscountM = React.lazy(()=> import('./dashboard/modals/DiscountM'))
+const CostumeSelect = React.lazy(()=> import('./dashboard/CostumeSelect'))
+const Comments = React.lazy(()=> import('./dashboard/Comments'))
+const ReviewsDetails = React.lazy(()=> import('./dashboard/modals/ReviewsDetails'))
+const AddReview = React.lazy(()=> import('./landingPage/AddReview'))
+const ReviewImages = React.lazy(()=> import('./landingPage/modals/ReviewImages'))
+const CostumerAdress = React.lazy(()=> import('./landingPage/modals/CostumerAdress'))
 
 export {
+    CostumerAdress,
+    CostumeSelect,
+    ReviewImages,
+    AddReview,
+    Review,
+    ReviewsDetails,
+    Comments,
+    Partners,
+    DiscountM,
+    FooterBanner,
+    Categories_Com,
+    Services,
+    Timer,
     SideBar,
     Loading,
     Footer,

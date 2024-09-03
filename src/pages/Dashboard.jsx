@@ -7,14 +7,23 @@ const Dashboard = () => {
   
   const {user} = useStateContext();
 
+  
   if (!user) {
+
     return <Navigate to="/auth/login" />
-  }else if(user.role !== 'seller'){
+
+  }else if (!user.verified_at) {
+
+    return <Navigate to="/auth/send-verification-code" />
+
+  }else if (user.role !== 'seller') {
+
     return <Navigate to="/" />
+    
   }
 
   return (
-    <div className="relative flex">
+    <div className="relative h-screen overflow-hidden flex">
         <SideBar />
 
         <div className="flex-1 flex flex-col h-screen bg-white">
@@ -22,12 +31,12 @@ const Dashboard = () => {
           <Header/>
 
           <div className="sm:px-10 w-screen lg:w-[calc(100vw_-_250px)] px-6 py-5 h-screen overflow-y-scroll hide-scrollbar">
-            {/* <div className=""> */}
+            
               <Outlet/>
-            {/* </div> */}
+              
           </div>
 
-          <Footer/>
+
         </div>
 
       </div>

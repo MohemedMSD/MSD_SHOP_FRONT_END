@@ -9,7 +9,7 @@ export default {
       colors: {
         primary: "#dcdcdc",
         second: "#f02d34",
-        primary_text : "#262a2d"
+        primary_text : "#324d67"
       }, //fade00
     },
   },

@@ -213,13 +213,13 @@ const ArchiveOrders = () => {
 
   return (
     <div>
-      <h1 className="text-[#324d67] mb-5 font-bold text-[19px] sm:text-[25px] ">
+      <h1 className="text-primary_text mb-5 font-bold text-[19px] sm:text-[25px] ">
         Archive Orders
       </h1>
 
       <div className="border rounded-xl border-gray-200 shadow-lg">
         <div className="flex rounded-t-lg items-center justify-between p-3 bg-gray-200">
-          <h2 className="text-[#324D67] font-semibold text-[22px]">
+          <h2 className="text-primary_text font-semibold text-[22px]">
             Orders
           </h2>
         </div>
@@ -232,7 +232,7 @@ const ArchiveOrders = () => {
               type="date"
               value={SearchDate}
               onChange={(e) => dataFilterByDate(e)}
-              className="p-1 rounded-md border border-gray-300 focus:border-[#324D67] outline-none"
+              className="p-1 rounded-md border border-gray-300 focus:border-primary_text outline-none"
             />
             <button onClick={() => resetDateInput()}><IoMdCloseCircleOutline/></button>
           </div>
@@ -243,7 +243,7 @@ const ArchiveOrders = () => {
               type="text"
               value={SearchQuery}
               onChange={(e) => dataFilter(e)}
-              className="p-1 rounded-md border border-gray-300 focus:border-[#324D67] outline-none"
+              className="p-1 rounded-md border border-gray-300 focus:border-primary_text outline-none"
             />
           </div>
 
@@ -279,7 +279,7 @@ const ArchiveOrders = () => {
           >
             {IsLoading && <Loading />}
             {!IsLoading && errorMessage && (
-              <p className="absolute text-[21px] text-second font-bold -translate-y-[50%] text-center w-full left-0 top-[50%]">
+              <p className="absolute text-[21px] text-red-500 font-bold -translate-y-[50%] text-center w-full left-0 top-[50%]">
                 {errorMessage}
               </p>
             )}

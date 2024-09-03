@@ -42,7 +42,6 @@ const Register = () => {
     }).catch((rej) => {
 
       setIsLoading(false)
-      console.log(rej.response.data.email);
 
       if (rej.response.status === 422) {
 

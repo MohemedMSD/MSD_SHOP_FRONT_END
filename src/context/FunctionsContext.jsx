@@ -13,24 +13,44 @@ import { useState } from "react";
     const [currentPage, setCurrentPage] = useState(1)
     const [totalPages, settotalPages] = useState();
     
-    const goToPreviousPage = () => {
+    const goToPreviousPage = (setCurrentPage, setchangePage = null) => {
+
         setCurrentPage(prevPage => Math.max(prevPage - 1, 1));
+
+        if (setchangePage) {
+          setchangePage(true)
+        }
+
     };
 
-    const goToNextPage = () => {
-        setCurrentPage(prevPage => Math.min(prevPage + 1, totalPages));
+    const goToNextPage = (setCurrentPage, setchangePage = null, total_Pages = totalPages) => {
+
+        setCurrentPage(prevPage => Math.min(prevPage + 1, total_Pages));
+
+        if (setchangePage) {
+          setchangePage(true)
+        }
+
     };
 
-    const goToPage = (page) => {
+    const goToPage = (page, currentPage, setCurrentPage, totalPages, setchangePage = null) => {
 
         if(page > currentPage){
 
             setCurrentPage(prevPage => Math.min(prevPage + page - currentPage, totalPages));
+            
+            if (setchangePage) {
+              setchangePage(true)
+            }
 
         }else if (page < currentPage) {
 
             let pageNumber = currentPage - page
             setCurrentPage(prevPage => Math.min(prevPage - pageNumber, totalPages));
+
+            if (setchangePage) {
+              setchangePage(true)
+            }
 
         }
 
@@ -77,6 +97,40 @@ import { useState } from "react";
   
     }
 
+    // runder number of pages
+    const renderPages = (currentPage, totalPages, setCurrentPage, setchangePage) => {
+
+      const maxPagesVisible = 4;
+      const pages = []
+
+      for (let i = 1; i <= totalPages; i++) {
+        
+        if (i <= maxPagesVisible || i == currentPage || i + 1 == currentPage || i - 1 == currentPage || i == totalPages) {
+          
+          pages.push(
+            <li key={i}>
+              <button
+                onClick={() => goToPage(i, currentPage, setCurrentPage, totalPages, setchangePage)}
+                href="#"
+                className={`block ${
+                currentPage == i
+                  ? "border-second bg-second text-white"
+                  : "border-gray-100 bg-white text-gray-900"
+                } size-8 rounded border text-center leading-8 `}
+              >
+                {i}
+              </button>
+            </li>
+          )
+        }else if(pages[pages.length - 1] != '...'){
+          pages.push('...')
+        }
+        
+      }
+      
+      return pages
+    }
+
     return (
       <Context.Provider
         value={{
@@ -91,7 +145,8 @@ import { useState } from "react";
             settotalPages,
             setitemsPerPage,
             PrepareArrayItems,
-            dataFilter
+            dataFilter,
+            renderPages
         }}
       >
         {children}

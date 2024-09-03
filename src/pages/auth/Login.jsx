@@ -6,7 +6,7 @@ import { useStateContext } from "../../context/StateContext";
 
 const Login = () => {
 
-    const {setUser, user} = useStateContext()
+  const {setUser, user} = useStateContext()
 
   const [Email, setEmail] = useState('')
   const [Password, setPassword] = useState('')
@@ -30,7 +30,17 @@ const Login = () => {
       .then((res) => {
 
         setUser(res.data.user, res.data.baseUrl);
-        window.location.href = '/'
+
+        const redirectPath = sessionStorage.getItem('redirectPath')
+
+        if (redirectPath) {
+          window.location.href = redirectPath
+          sessionStorage.removeItem('redirectPath')
+        }else{
+          window.location.href = '/'
+        }
+
+
   
       }).catch((rej) => {
 
@@ -149,16 +159,16 @@ const Login = () => {
               }
             </div>
 
-            {/* <div className="flex items-center mb-6 -mt-4">
+            <div className="flex items-center mb-6 -mt-4">
               <div className="flex ml-auto">
-                <a
-                  href="#"
+                <NavLink
+                  to="/auth/forget-password"
                   className="inline-flex text-xs sm:text-sm text-gray-500 hover:text-gray-700"
                 >
                   Forgot Your Password?
-                </a>
+                </NavLink>
               </div>
-            </div> */}
+            </div>
 
             <div className="flex w-full">
               <button
@@ -187,7 +197,7 @@ const Login = () => {
 
         <div className="flex justify-center items-center mt-6">
           <NavLink
-            to='/guest/register'
+            to='/auth/register'
             className="inline-flex items-center font-bold text-second hover:text-red-700 text-xs text-center"
           >
             <span>

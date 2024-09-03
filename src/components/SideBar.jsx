@@ -30,7 +30,7 @@ const SideBar = () => {
 
   return (
     <div>
-      <div className="lg:flex hidden flex-col h-screen items-center py-7 px-4 w-[250px] bg-gradient-to-tl from-[#324D67] to-[#060606] ">
+      <div className="lg:flex hidden flex-col h-screen items-center py-7 px-4 w-[250px] bg-gradient-to-tl from-primary_text to-[#060606] ">
         <Link
           className="flex items-center ml-[-12px]"
           to="/dashboard"
@@ -53,14 +53,14 @@ const SideBar = () => {
       </div>
 
       <div
-        className={`absolute top-0 h-screen w-3/4 sm:w-2/4 bg-gradient-to-tl from-[#324D67] to-[#060606]
+        className={`absolute top-0 h-screen w-[90%] sm:w-2/4 bg-gradient-to-tl from-primary_text to-[#060606]
         z-50 backdrop-blur-lg p-6 lg:hidden smooth-transition ${
           mobileMenuOpen ? "left-0" : "-left-full"
         }`}
       >
-        <div className='flex justify-between'>
+        <div className='flex relative justify-between'>
 
-          <Link to="/dashboard">
+          <Link className='mb-5' to="/dashboard">
             <p className="font-bold text-center tracking-md text-2xl ml-2 mt-[-4px] text-gray-100">
               MSD SHOP
             </p>
@@ -75,7 +75,7 @@ const SideBar = () => {
           }
         </div>
           
-        <hr className='border-gray-200 mt-5 w-[130%] -ml-[30px]'/>
+        <hr className='border-gray-200 absolute w-full right-0'/>
 
         <NavLinks hundelClick={() => hundelClickIN()} />
       </div>
