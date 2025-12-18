@@ -1,0 +1,1 @@
+import{u as s,j as a,E as e,t as i}from"./index-B443Sde4.js";const r=()=>{const{user:r}=s();return r&&!r.verified_at&&(window.location.href="/auth/send-verification-code"),a.jsxs("div",{className:"px-2 sm:px-4",children:[a.jsx("header",{children:a.jsx(e,{})}),a.jsx("main",{className:"max-w-[1543px] m-auto w-full",children:a.jsx(i,{})})]})};export{r as default};

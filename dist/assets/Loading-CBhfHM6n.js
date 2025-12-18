@@ -1,0 +1,1 @@
+import{j as e}from"./index-B443Sde4.js";const s=()=>e.jsx("div",{className:"w-full top-0 right-0 h-full absolute bg-white flex justify-center items-center",children:e.jsx("div",{className:"loader"})});export{s as default};

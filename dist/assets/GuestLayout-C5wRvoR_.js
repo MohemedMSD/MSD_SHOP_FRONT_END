@@ -1,0 +1,1 @@
+import{u as a,a as t,j as e,k as i,t as n}from"./index-B443Sde4.js";function o(){const{user:o}=a(),{token:s}=t();return o&&(o.verified_at||"/auth/send-verification-code"!==window.location.pathname&&s&&window.location.pathname!==`/auth/email-verification/${s}`)?e.jsx(i,{to:"/"}):e.jsx(e.Fragment,{children:e.jsx(n,{})})}export{o as default};

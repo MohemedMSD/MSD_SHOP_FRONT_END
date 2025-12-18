@@ -1,0 +1,1 @@
+import{j as e,P as s,N as a}from"./index-B443Sde4.js";function r(){return e.jsxs("header",{className:"flex p-3 items-center gap-5 justify-end bg-gray-100",children:[e.jsx(s,{}),e.jsx(a,{})]})}export{r as default};
